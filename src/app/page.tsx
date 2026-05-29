@@ -10,119 +10,152 @@ type Prediction = {
   prediction: string
 }
 
-const matches = [
-  {
-    matchId: "ger-prk",
-    homeTeam: {
-      name: "Alemania",
-      code: "GER",
-      flagUrl: "https://flagcdn.com/w320/de.png",
-    },
-    awayTeam: {
-      name: "Corea del Norte",
-      code: "PRK",
-      flagUrl: "https://flagcdn.com/w320/kp.png",
-    },
-    matchDate: "15 Jun 2026",
-    matchTime: "18:00",
-    venue: "Estadio Olímpico, Berlín",
-  },
-  {
-    matchId: "arg-fra",
-    homeTeam: {
-      name: "Argentina",
-      code: "ARG",
-      flagUrl: "https://flagcdn.com/w320/ar.png",
-    },
-    awayTeam: {
-      name: "Francia",
-      code: "FRA",
-      flagUrl: "https://flagcdn.com/w320/fr.png",
-    },
-    matchDate: "15 Jun 2026",
-    matchTime: "20:00",
-    venue: "Estadio Monumental, Buenos Aires",
-  },
-  {
-    matchId: "jpn-esp",
-    homeTeam: {
-      name: "Japón",
-      code: "JPN",
-      flagUrl: "https://flagcdn.com/w320/jp.png",
-    },
-    awayTeam: {
-      name: "España",
-      code: "ESP",
-      flagUrl: "https://flagcdn.com/w320/es.png",
-    },
-    matchDate: "15 Jun 2026",
-    matchTime: "22:00",
-    venue: "Tokyo Stadium, Tokio",
-  },
-]
+type Match = {
+  id: string
+  homeTeam: string
+  awayTeam: string
+  venue: string
+  matchDate: string
+}
 
 export default function Home() {
+
   const [predictions, setPredictions] = useState<Prediction[]>([])
 
+  const [matches, setMatches] = useState<Match[]>([])
+
   async function loadPredictions() {
+
     try {
+
       const response = await fetch("/api/predictions")
+
       const data = await response.json()
+
       setPredictions(data)
+
     } catch (error) {
-      console.error("Error cargando predicciones:", error)
+
+      console.error(
+        "Error cargando predicciones:",
+        error
+      )
+    }
+  }
+
+  async function loadMatches() {
+
+    try {
+
+      const response = await fetch("/api/matches")
+
+      const data = await response.json()
+
+      setMatches(data)
+
+    } catch (error) {
+
+      console.error(
+        "Error cargando partidos:",
+        error
+      )
     }
   }
 
   useEffect(() => {
+
     loadPredictions()
+
+    loadMatches()
+
   }, [])
 
   return (
+
     <main className="min-h-screen bg-zinc-950 text-white">
+
       <Navbar />
 
       <div className="p-6">
+
         <h1 className="text-4xl font-bold mb-8">
           Quiniela Mundial 2026
         </h1>
 
         <div className="flex flex-col gap-4">
+
           {matches.map((match) => (
+
             <MatchCard
-              key={match.matchId}
-              matchId={match.matchId}
-              homeTeam={match.homeTeam}
-              awayTeam={match.awayTeam}
-              matchDate={match.matchDate}
-              matchTime={match.matchTime}
+              key={match.id}
+
+              matchId={match.id}
+
+              homeTeam={{
+                name: match.homeTeam,
+                code: match.homeTeam.slice(0, 3).toUpperCase(),
+                flagUrl: "https://flagcdn.com/w320/de.png"
+              }}
+
+              awayTeam={{
+                name: match.awayTeam,
+                code: match.awayTeam.slice(0, 3).toUpperCase(),
+                flagUrl: "https://flagcdn.com/w320/fr.png"
+              }}
+
+              matchDate={
+                new Date(match.matchDate)
+                  .toLocaleDateString()
+              }
+
+              matchTime={
+                new Date(match.matchDate)
+                  .toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  })
+              }
+
               venue={match.venue}
+
               onSave={loadPredictions}
             />
           ))}
         </div>
 
         <div className="mt-8">
+
           <h2 className="text-xl font-bold mb-2">
             Predicciones:
           </h2>
 
           <div className="bg-zinc-900 p-4 rounded-xl">
+
             {predictions.length > 0 ? (
+
               predictions.map((item, index) => (
+
                 <div
                   key={index}
                   className="mb-3 border-b border-zinc-700 pb-2"
                 >
+
                   <p>
-                    <strong>Partido:</strong> {item.matchId}
+                    <strong>Partido:</strong>
+                    {" "}
+                    {item.matchId}
                   </p>
+
                   <p>
-                    <strong>Pronóstico:</strong> {item.prediction}
+                    <strong>Pronóstico:</strong>
+                    {" "}
+                    {item.prediction}
                   </p>
                 </div>
               ))
+
             ) : (
+
               <p className="text-zinc-400">
                 No hay predicciones todavía.
               </p>

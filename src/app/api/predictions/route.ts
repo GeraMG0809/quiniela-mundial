@@ -1,35 +1,69 @@
 import { NextResponse } from "next/server"
-
-const predictions = [
-  { matchId: "Alemania-Corea del Norte", prediction: "2-1" }
-]
-
-export async function GET() {
-  return NextResponse.json(predictions)
-}
+import { prisma } from "@/lib/prisma"
 
 export async function POST(request: Request) {
-  const body = await request.json()
-  const { matchId, prediction } = body
 
-  // buscar si ya existe
-  const existingPrediction = predictions.find(
-    (item) => item.matchId === matchId
-  )
+  try {
 
-  if (existingPrediction) {
-    // actualizar
-    existingPrediction.prediction = prediction
-  } else {
-    // crear nuevo
-    predictions.push({
+    const body = await request.json()
+
+    const {
+      userId,
       matchId,
-      prediction
-    })
-  }
+      homeScore,
+      awayScore
+    } = body
 
-  return NextResponse.json({
-    message: "Pronóstico guardado",
-    predictions
-  })
+    const prediction = await prisma.prediction.create({
+      data: {
+        userId,
+        matchId,
+        predictedHomeScore: homeScore,
+        predictedAwayScore: awayScore
+      }
+    })
+
+    return NextResponse.json(prediction)
+
+  } catch (error) {
+
+    console.error(error)
+
+    return NextResponse.json(
+      {
+        error: "Error al guardar predicción"
+      },
+      {
+        status: 500
+      }
+    )
+  }
+}
+
+export async function GET() {
+
+  try {
+
+    const predictions = await prisma.prediction.findMany({
+      include: {
+        match: true,
+        user: true
+      }
+    })
+
+    return NextResponse.json(predictions)
+
+  } catch (error) {
+
+    console.error(error)
+
+    return NextResponse.json(
+      {
+        error: "Error al obtener predicciones"
+      },
+      {
+        status: 500
+      }
+    )
+  }
 }
