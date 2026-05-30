@@ -29,14 +29,12 @@ export default function MatchCard({
   venue,
   onSave,
 }: MatchCardProps) {
-
   const [homeScore, setHomeScore] = useState("")
   const [awayScore, setAwayScore] = useState("")
   const [isSaved, setIsSaved] = useState(false)
   const [error, setError] = useState("")
 
   async function handleSave() {
-
     if (homeScore === "" || awayScore === "") {
       setError("Debes completar ambos marcadores")
       return
@@ -45,14 +43,12 @@ export default function MatchCard({
     setError("")
 
     try {
-
       const response = await fetch("/api/predictions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: "cmpqlkaq80000gthfk20ilf15",
           matchId,
           homeScore: Number(homeScore),
           awayScore: Number(awayScore),
@@ -69,14 +65,9 @@ export default function MatchCard({
         setIsSaved(false)
       }, 2000)
 
-      if (onSave) {
-        onSave()
-      }
-
+      onSave?.()
     } catch (err) {
-
       console.error(err)
-
       setError("No se pudo guardar la predicción")
     }
   }
@@ -85,21 +76,16 @@ export default function MatchCard({
     value: string,
     setter: React.Dispatch<React.SetStateAction<string>>
   ) {
-
     if (value === "" || /^[0-9]$/.test(value)) {
       setter(value)
     }
   }
 
   return (
-
     <div className="w-full max-w-md mx-auto">
-
       <div className="relative overflow-hidden rounded-3xl bg-zinc-900 shadow-2xl border border-zinc-800">
-
         {/* Header */}
         <div className="relative h-24 bg-gradient-to-br from-[#2A398D] via-[#2A398D] to-[#3CAC3B]">
-
           <div className="absolute inset-0 opacity-20">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2" />
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-1/2 -translate-x-1/2" />
@@ -107,7 +93,6 @@ export default function MatchCard({
 
           {/* Badge */}
           <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full">
-
             <Trophy className="w-4 h-4 text-white" />
 
             <span className="text-white text-sm font-semibold tracking-wide">
@@ -117,7 +102,6 @@ export default function MatchCard({
 
           {/* Fecha */}
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-4 text-white/90">
-
             <div className="flex items-center gap-1.5">
               <Clock className="w-4 h-4" />
 
@@ -136,20 +120,16 @@ export default function MatchCard({
 
         {/* Contenido */}
         <div className="px-6 py-8">
-
           <div className="flex items-center justify-between gap-4">
-
-            {/* Equipo local */}
+            {/* Local */}
             <div className="flex-1 flex flex-col items-center gap-3">
-
               <div className="relative">
-
                 <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-lg ring-4 ring-[#3CAC3B]/20 transition-transform hover:scale-105">
-
                   <Image
                     src={homeTeam.flagUrl}
                     alt={`Bandera de ${homeTeam.name}`}
                     fill
+                    sizes="80px"
                     className="object-cover"
                   />
                 </div>
@@ -160,7 +140,6 @@ export default function MatchCard({
               </div>
 
               <div className="text-center">
-
                 <p className="font-bold text-white text-sm uppercase tracking-wider">
                   {homeTeam.code}
                 </p>
@@ -173,7 +152,6 @@ export default function MatchCard({
 
             {/* Marcadores */}
             <div className="flex items-center gap-3">
-
               <input
                 type="text"
                 inputMode="numeric"
@@ -191,7 +169,6 @@ export default function MatchCard({
               />
 
               <div className="flex flex-col items-center gap-1">
-
                 <div className="w-2 h-2 rounded-full bg-[#E61D25]" />
 
                 <span className="text-lg font-bold text-zinc-400">
@@ -218,17 +195,15 @@ export default function MatchCard({
               />
             </div>
 
-            {/* Equipo visitante */}
+            {/* Visitante */}
             <div className="flex-1 flex flex-col items-center gap-3">
-
               <div className="relative">
-
                 <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-lg ring-4 ring-[#E61D25]/20 transition-transform hover:scale-105">
-
                   <Image
                     src={awayTeam.flagUrl}
                     alt={`Bandera de ${awayTeam.name}`}
                     fill
+                    sizes="80px"
                     className="object-cover"
                   />
                 </div>
@@ -239,7 +214,6 @@ export default function MatchCard({
               </div>
 
               <div className="text-center">
-
                 <p className="font-bold text-white text-sm uppercase tracking-wider">
                   {awayTeam.code}
                 </p>
@@ -253,7 +227,6 @@ export default function MatchCard({
 
           {/* Venue */}
           <div className="mt-6 flex items-center justify-center gap-2 text-zinc-400">
-
             <MapPin className="w-4 h-4 text-[#E61D25]" />
 
             <span className="text-sm">
@@ -284,7 +257,6 @@ export default function MatchCard({
               ${isSaved ? "!bg-[#3CAC3B] scale-95" : ""}
             `}
           >
-
             <Save
               className={`w-5 h-5 transition-transform ${
                 isSaved ? "animate-bounce" : ""

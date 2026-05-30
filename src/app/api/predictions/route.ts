@@ -1,21 +1,38 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { cookies } from "next/headers"
 
 export async function POST(request: Request) {
   try {
     const body = await request.json()
 
     const {
-      userId,
       matchId,
       homeScore,
       awayScore
     } = body
 
+    const cookieStore = await cookies()
+
+    const session = cookieStore.get("session")
+
+    if (!session) {
+      return NextResponse.json(
+        {
+          error: "No autenticado"
+        },
+        {
+          status: 401
+        }
+      )
+    }
+
+    const user = JSON.parse(session.value)
+
     const prediction = await prisma.prediction.upsert({
       where: {
-          userId_matchId: {
-          userId,
+        userId_matchId: {
+          userId: user.id,
           matchId
         }
       },
@@ -24,7 +41,7 @@ export async function POST(request: Request) {
         predictedAwayScore: awayScore
       },
       create: {
-        userId,
+        userId: user.id,
         matchId,
         predictedHomeScore: homeScore,
         predictedAwayScore: awayScore
@@ -48,11 +65,47 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
-  const predictions = await prisma.prediction.findMany({
-    include: {
-      match: true
-    }
-  })
+  try {
 
-  return NextResponse.json(predictions)
+    const cookieStore = await cookies()
+
+    const session = cookieStore.get("session")
+
+    if (!session) {
+      return NextResponse.json(
+        {
+          error: "No autenticado"
+        },
+        {
+          status: 401
+        }
+      )
+    }
+
+    const user = JSON.parse(session.value)
+
+    const predictions = await prisma.prediction.findMany({
+      where: {
+        userId: user.id
+      },
+      include: {
+        match: true
+      }
+    })
+
+    return NextResponse.json(predictions)
+
+  } catch (error) {
+
+    console.error(error)
+
+    return NextResponse.json(
+      {
+        error: "Error al obtener predicciones"
+      },
+      {
+        status: 500
+      }
+    )
+  }
 }
