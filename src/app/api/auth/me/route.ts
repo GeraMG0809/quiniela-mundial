@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
+import { getSession } from "@/lib/auth"
 
 export async function GET() {
-  const cookieStore = await cookies()
-
-  const session = cookieStore.get("session")
+  const session = await getSession()
 
   if (!session) {
     return NextResponse.json(
@@ -19,6 +17,6 @@ export async function GET() {
 
   return NextResponse.json({
     authenticated: true,
-    user: JSON.parse(session.value)
+    user: session
   })
 }

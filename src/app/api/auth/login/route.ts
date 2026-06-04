@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcrypt"
+import { sessionCookieOptions } from "@/lib/auth"
 
 export async function POST(request: Request) {
   try {
@@ -45,11 +46,14 @@ export async function POST(request: Request) {
     }
 
     const response = NextResponse.json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      points: user.points
+      authenticated: true,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        points: user.points
+      }
     })
 
     response.cookies.set(
@@ -58,15 +62,10 @@ export async function POST(request: Request) {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        points: user.points
       }),
-      {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7
-      }
+      sessionCookieOptions
     )
 
     return response
