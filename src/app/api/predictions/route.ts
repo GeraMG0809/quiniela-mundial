@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { cookies } from "next/headers"
+import { getSession } from "@/lib/auth"
 
 export async function POST(request: Request) {
   try {
@@ -12,11 +12,9 @@ export async function POST(request: Request) {
       awayScore
     } = body
 
-    const cookieStore = await cookies()
+    const user = await getSession()
 
-    const session = cookieStore.get("session")
-
-    if (!session) {
+    if (!user) {
       return NextResponse.json(
         {
           error: "No autenticado"
@@ -26,8 +24,6 @@ export async function POST(request: Request) {
         }
       )
     }
-
-    const user = JSON.parse(session.value)
 
     const prediction = await prisma.prediction.upsert({
       where: {
@@ -66,12 +62,9 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
+    const user = await getSession()
 
-    const cookieStore = await cookies()
-
-    const session = cookieStore.get("session")
-
-    if (!session) {
+    if (!user) {
       return NextResponse.json(
         {
           error: "No autenticado"
@@ -81,8 +74,6 @@ export async function GET() {
         }
       )
     }
-
-    const user = JSON.parse(session.value)
 
     const predictions = await prisma.prediction.findMany({
       where: {

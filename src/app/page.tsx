@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import MatchCard from "@/components/MathCard"
 import Navbar from "@/components/NavBar"
 import Counter from "@/components/Counter"
+import { getFlagUrl } from "@/lib/flags"
 
 type Prediction = {
   matchId: string
@@ -21,25 +22,28 @@ type Match = {
 export default function Home() {
 
   const [predictions, setPredictions] = useState<Prediction[]>([])
+  const [predictionsError, setPredictionsError] = useState("")
 
   const [matches, setMatches] = useState<Match[]>([])
 
   async function loadPredictions() {
-
     try {
-
       const response = await fetch("/api/predictions")
 
       const data = await response.json()
 
+      if (!response.ok) {
+        setPredictions([])
+        setPredictionsError(data.error || "No se pudieron cargar las predicciones")
+        return
+      }
+
       setPredictions(data)
-
+      setPredictionsError("")
     } catch (error) {
-
-      console.error(
-        "Error cargando predicciones:",
-        error
-      )
+      console.error("Error cargando predicciones:", error)
+      setPredictions([])
+      setPredictionsError("Error de conexión al cargar predicciones")
     }
   }
 
@@ -94,26 +98,24 @@ export default function Home() {
               homeTeam={{
                 name: match.homeTeam,
                 code: match.homeTeam.slice(0, 3).toUpperCase(),
-                flagUrl: "https://flagcdn.com/w320/de.png"
+                flagUrl: getFlagUrl(match.homeTeam)
               }}
 
               awayTeam={{
                 name: match.awayTeam,
                 code: match.awayTeam.slice(0, 3).toUpperCase(),
-                flagUrl: "https://flagcdn.com/w320/fr.png"
+                flagUrl: getFlagUrl(match.awayTeam)
               }}
 
               matchDate={
-                new Date(match.matchDate)
-                  .toLocaleDateString()
+                new Date(match.matchDate).toLocaleDateString()
               }
 
               matchTime={
-                new Date(match.matchDate)
-                  .toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                  })
+                new Date(match.matchDate).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit"
+                })
               }
 
               venue={match.venue}
@@ -131,7 +133,11 @@ export default function Home() {
 
           <div className="bg-zinc-900 p-4 rounded-xl">
 
-            {predictions.length > 0 ? (
+            {predictionsError ? (
+              <p className="text-yellow-300 text-sm text-center">
+                {predictionsError}
+              </p>
+            ) : predictions.length > 0 ? (
 
               predictions.map((item, index) => (
 
