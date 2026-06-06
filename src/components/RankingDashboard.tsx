@@ -29,72 +29,90 @@ export default function RankingDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  useEffect(() => {
-    const loadRanking = async () => {
-      try {
-        const response = await fetch("/api/ranking", { cache: "no-store" })
-        const data = await response.json()
+  const loadRanking = async () => {
+    try {
+      const response = await fetch("/api/ranking", { cache: "no-store" })
+      const data = await response.json()
 
-        if (!response.ok) {
-          setError(data.error || "No se pudo cargar el ranking")
-          setRanking([])
-          return
+      if (!response.ok) {
+        setError(data.error || "No se pudo cargar el ranking")
+        setRanking([])
+        return
+      }
+
+      const previousRanking = JSON.parse(
+        window.localStorage.getItem("quinielaRanking") || "[]"
+      ) as ApiRankingUser[]
+
+      const previousPositions = previousRanking.reduce<Record<string, number>>(
+        (acc, item) => {
+          acc[item.id] = item.rank
+          return acc
+        },
+        {}
+      )
+
+      const currentRanking = (data as ApiRankingUser[]).map((item) => {
+        const previousPosition = previousPositions[item.id]
+        let movement: RankingUser["movement"] = "same"
+
+        if (previousPosition !== undefined) {
+          if (item.rank < previousPosition) movement = "up"
+          if (item.rank > previousPosition) movement = "down"
         }
 
-        const previousRanking = JSON.parse(
-          window.localStorage.getItem("quinielaRanking") || "[]"
-        ) as ApiRankingUser[]
+        return {
+          id: item.id,
+          position: item.rank,
+          name: item.name,
+          points: item.points,
+          exacts: item.exactCount,
+          hits: item.correctResultCount,
+          predictions: item.predictionsCount,
+          movement
+        }
+      })
 
-        const previousPositions = previousRanking.reduce<Record<string, number>>(
-          (acc, item) => {
-            acc[item.id] = item.rank
-            return acc
-          },
-          {}
-        )
+      window.localStorage.setItem("quinielaRanking", JSON.stringify(data))
+      setRanking(currentRanking)
+    } catch (fetchError) {
+      console.error(fetchError)
+      setError("Error de conexión al cargar el ranking")
+    } finally {
+      setLoading(false)
+    }
+  }
 
-        const currentRanking = (data as ApiRankingUser[]).map((item) => {
-          const previousPosition = previousPositions[item.id]
-          let movement: RankingUser["movement"] = "same"
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      loadRanking()
+    }, 0)
 
-          if (previousPosition !== undefined) {
-            if (item.rank < previousPosition) movement = "up"
-            if (item.rank > previousPosition) movement = "down"
-          }
+    const interval = window.setInterval(() => {
+      loadRanking()
+    }, 30000)
 
-          return {
-            id: item.id,
-            position: item.rank,
-            name: item.name,
-            points: item.points,
-            exacts: item.exactCount,
-            hits: item.correctResultCount,
-            predictions: item.predictionsCount,
-            movement
-          }
-        })
-
-        window.localStorage.setItem("quinielaRanking", JSON.stringify(data))
-        setRanking(currentRanking)
-      } catch (fetchError) {
-        console.error(fetchError)
-        setError("Error de conexión al cargar el ranking")
-      } finally {
-        setLoading(false)
-      }
+    const onFocus = () => {
+      loadRanking()
     }
 
-    loadRanking()
+    window.addEventListener("focus", onFocus)
+
+    return () => {
+      window.clearTimeout(timer)
+      window.clearInterval(interval)
+      window.removeEventListener("focus", onFocus)
+    }
   }, [])
 
   const getPositionStyle = (position: number) => {
     switch (position) {
       case 1:
-        return "bg-gradient-to-r from-yellow-600/30 via-yellow-500/20 to-yellow-600/30 border-yellow-500/50"
+        return "bg-linear-to-r from-yellow-600/30 via-yellow-500/20 to-yellow-600/30 border-yellow-500/50"
       case 2:
-        return "bg-gradient-to-r from-slate-400/20 via-slate-300/15 to-slate-400/20 border-slate-400/50"
+        return "bg-linear-to-r from-slate-400/20 via-slate-300/15 to-slate-400/20 border-slate-400/50"
       case 3:
-        return "bg-gradient-to-r from-amber-700/25 via-amber-600/15 to-amber-700/25 border-amber-600/50"
+        return "bg-linear-to-r from-amber-700/25 via-amber-600/15 to-amber-700/25 border-amber-600/50"
       default:
         return "bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-700/50"
     }
@@ -103,21 +121,21 @@ export default function RankingDashboard() {
   const getPositionBadge = (position: number) => {
     if (position === 1) {
       return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-lg shadow-yellow-500/30">
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-linear-to-br from-yellow-400 to-yellow-600 shadow-lg shadow-yellow-500/30">
           <Trophy className="w-4 h-4 text-yellow-900" />
         </div>
       )
     }
     if (position === 2) {
       return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-slate-300 to-slate-500 shadow-lg shadow-slate-400/30">
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-linear-to-br from-slate-300 to-slate-500 shadow-lg shadow-slate-400/30">
           <Medal className="w-4 h-4 text-slate-800" />
         </div>
       )
     }
     if (position === 3) {
       return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 shadow-lg shadow-amber-600/30">
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-linear-to-br from-amber-500 to-amber-700 shadow-lg shadow-amber-600/30">
           <Medal className="w-4 h-4 text-amber-900" />
         </div>
       )
@@ -154,7 +172,7 @@ export default function RankingDashboard() {
 
   return (
     <div className="w-full">
-      <div className="bg-gradient-to-r from-[#2A398D] via-[#2A398D]/90 to-[#3CAC3B]/80 rounded-t-2xl p-6 border border-zinc-700/50">
+      <div className="bg-linear-to-r from-[#2A398D] via-[#2A398D]/90 to-[#3CAC3B]/80 rounded-t-2xl p-6 border border-zinc-700/50">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
@@ -176,7 +194,7 @@ export default function RankingDashboard() {
 
       <div className="bg-zinc-900/80 backdrop-blur-sm rounded-b-2xl border border-t-0 border-zinc-700/50 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[700px]">
+          <table className="w-full min-w-175">
             <thead className="sticky top-0 z-10">
               <tr className="bg-zinc-800/90 backdrop-blur-sm border-b border-zinc-700/50">
                 <th className="px-4 py-4 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">
@@ -231,7 +249,7 @@ export default function RankingDashboard() {
                     <td className="px-4 py-4">{getPositionBadge(user.position)}</td>
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2A398D] to-[#3CAC3B] flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                        <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#2A398D] to-[#3CAC3B] flex items-center justify-center text-white font-bold text-sm shadow-lg">
                           {user.name.charAt(0).toUpperCase()}
                         </div>
                         <span className={`font-medium ${user.position <= 3 ? "text-white" : "text-zinc-300"}`}>
@@ -245,12 +263,12 @@ export default function RankingDashboard() {
                       </span>
                     </td>
                     <td className="px-4 py-4 text-center">
-                      <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-1 bg-[#2A398D]/30 text-[#7B8FD4] rounded-lg font-semibold text-sm">
+                      <span className="inline-flex items-center justify-center min-w-8 px-2 py-1 bg-[#2A398D]/30 text-[#7B8FD4] rounded-lg font-semibold text-sm">
                         {user.exacts}
                       </span>
                     </td>
                     <td className="px-4 py-4 text-center">
-                      <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-1 bg-[#3CAC3B]/20 text-[#3CAC3B] rounded-lg font-semibold text-sm">
+                      <span className="inline-flex items-center justify-center min-w-8 px-2 py-1 bg-[#3CAC3B]/20 text-[#3CAC3B] rounded-lg font-semibold text-sm">
                         {user.hits}
                       </span>
                     </td>
