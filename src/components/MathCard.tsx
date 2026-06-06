@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import Link from "next/link"
 import { MapPin, Clock, Save, Trophy } from "lucide-react"
 import Image from "next/image"
 
@@ -17,6 +18,10 @@ interface MatchCardProps {
   matchDate: string
   matchTime: string
   venue: string
+  existingPrediction?: {
+    homeScore: number
+    awayScore: number
+  }
   onSave?: () => void
 }
 
@@ -27,12 +32,23 @@ export default function MatchCard({
   matchDate,
   matchTime,
   venue,
+  existingPrediction,
   onSave,
 }: MatchCardProps) {
   const [homeScore, setHomeScore] = useState("")
   const [awayScore, setAwayScore] = useState("")
   const [isSaved, setIsSaved] = useState(false)
   const [error, setError] = useState("")
+
+  const hasSavedPrediction = existingPrediction !== undefined
+
+  useEffect(() => {
+    if (existingPrediction) {
+      setHomeScore(String(existingPrediction.homeScore))
+      setAwayScore(String(existingPrediction.awayScore))
+      setIsSaved(true)
+    }
+  }, [existingPrediction])
 
   async function handleSave() {
     if (homeScore === "" || awayScore === "") {
@@ -85,7 +101,7 @@ export default function MatchCard({
     <div className="w-full max-w-md mx-auto">
       <div className="relative overflow-hidden rounded-3xl bg-zinc-900 shadow-2xl border border-zinc-800">
         {/* Header */}
-        <div className="relative h-24 bg-gradient-to-br from-[#2A398D] via-[#2A398D] to-[#3CAC3B]">
+        <div className="relative h-24 bg-linear-to-br from-[#2A398D] via-[#2A398D] to-[#3CAC3B]">
           <div className="absolute inset-0 opacity-20">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2" />
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-1/2 -translate-x-1/2" />
@@ -156,7 +172,7 @@ export default function MatchCard({
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                maxLength={1}
+                maxLength={2}
                 value={homeScore}
                 onChange={(e) =>
                   handleScoreChange(
@@ -165,7 +181,8 @@ export default function MatchCard({
                   )
                 }
                 placeholder="-"
-                className="w-14 h-16 text-center text-3xl font-bold bg-[#2A398D]/10 border-2 border-[#2A398D]/20 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#2A398D] focus:ring-4 focus:ring-[#2A398D]/10 transition-all"
+                disabled={hasSavedPrediction}
+                className="w-14 h-16 text-center text-3xl font-bold bg-[#2A398D]/10 border-2 border-[#2A398D]/20 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#2A398D] focus:ring-4 focus:ring-[#2A398D]/10 transition-all disabled:cursor-not-allowed disabled:opacity-70"
               />
 
               <div className="flex flex-col items-center gap-1">
@@ -182,7 +199,7 @@ export default function MatchCard({
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                maxLength={1}
+                maxLength={2}
                 value={awayScore}
                 onChange={(e) =>
                   handleScoreChange(
@@ -191,7 +208,8 @@ export default function MatchCard({
                   )
                 }
                 placeholder="-"
-                className="w-14 h-16 text-center text-3xl font-bold bg-[#2A398D]/10 border-2 border-[#2A398D]/20 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#2A398D] focus:ring-4 focus:ring-[#2A398D]/10 transition-all"
+                disabled={hasSavedPrediction}
+                className="w-14 h-16 text-center text-3xl font-bold bg-[#2A398D]/10 border-2 border-[#2A398D]/20 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#2A398D] focus:ring-4 focus:ring-[#2A398D]/10 transition-all disabled:cursor-not-allowed disabled:opacity-70"
               />
             </div>
 
@@ -241,20 +259,30 @@ export default function MatchCard({
             </p>
           )}
 
+          {hasSavedPrediction && (
+            <div className="mt-4 rounded-3xl border border-[#3CAC3B]/20 bg-[#3CAC3B]/10 p-4 text-sm text-[#d6ffd6]">
+              Ya tienes un pronóstico guardado para este partido. Edita tu marcador en{' '}
+              <Link href="/predictions" className="font-semibold text-white underline">
+                Mis Predicciones
+              </Link>
+              .
+            </div>
+          )}
+
           {/* Botón */}
           <button
             onClick={handleSave}
-            disabled={homeScore === "" || awayScore === ""}
+            disabled={homeScore === "" || awayScore === "" || hasSavedPrediction}
             className={`
               mt-6 w-full py-4 rounded-2xl font-semibold text-white
               flex items-center justify-center gap-2
               transition-all duration-300 ease-out
               ${
-                homeScore !== "" && awayScore !== ""
-                  ? "bg-gradient-to-r from-[#3CAC3B] to-[#2A398D] hover:shadow-lg hover:shadow-[#3CAC3B]/30 hover:-translate-y-0.5 active:translate-y-0"
+                homeScore !== "" && awayScore !== "" && !hasSavedPrediction
+                  ? "bg-linear-to-r from-[#3CAC3B] to-[#2A398D] hover:shadow-lg hover:shadow-[#3CAC3B]/30 hover:-translate-y-0.5 active:translate-y-0"
                   : "bg-zinc-700 cursor-not-allowed"
               }
-              ${isSaved ? "!bg-[#3CAC3B] scale-95" : ""}
+              ${isSaved ? "bg-[#3CAC3B]! scale-95" : ""}
             `}
           >
             <Save
@@ -272,7 +300,7 @@ export default function MatchCard({
         </div>
 
         {/* Decoración */}
-        <div className="h-2 bg-gradient-to-r from-[#3CAC3B] via-[#2A398D] to-[#E61D25]" />
+        <div className="h-2 bg-linear-to-r from-[#3CAC3B] via-[#2A398D] to-[#E61D25]" />
       </div>
     </div>
   )

@@ -9,7 +9,8 @@ export async function POST(request: Request) {
     const {
       matchId,
       homeScore,
-      awayScore
+      awayScore,
+      allowUpdate = false
     } = body
     // obtener sesión del usuario
     const user = await getSession()
@@ -54,24 +55,42 @@ export async function POST(request: Request) {
       )
     }
 
-    const prediction = await prisma.prediction.upsert({
+    const existingPrediction = await prisma.prediction.findUnique({
       where: {
         userId_matchId: {
           userId: user.id,
           matchId
         }
-      },
-      update: {
-        predictedHomeScore: homeScore,
-        predictedAwayScore: awayScore
-      },
-      create: {
-        userId: user.id,
-        matchId,
-        predictedHomeScore: homeScore,
-        predictedAwayScore: awayScore
       }
     })
+
+    if (existingPrediction && !allowUpdate) {
+      return NextResponse.json(
+        {
+          error: "Ya existe una predicción para este partido. Edítala en Mis Predicciones."
+        },
+        {
+          status: 409
+        }
+      )
+    }
+
+    const prediction = existingPrediction
+      ? await prisma.prediction.update({
+          where: { id: existingPrediction.id },
+          data: {
+            predictedHomeScore: homeScore,
+            predictedAwayScore: awayScore
+          }
+        })
+      : await prisma.prediction.create({
+          data: {
+            userId: user.id,
+            matchId,
+            predictedHomeScore: homeScore,
+            predictedAwayScore: awayScore
+          }
+        })
 
     return NextResponse.json(prediction)
 
