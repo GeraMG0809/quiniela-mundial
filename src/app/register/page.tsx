@@ -279,7 +279,7 @@ export default function RegisterPage() {
               className="w-full py-3.5 px-4 rounded-lg font-semibold text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
               style={{
                 background: isLoading
-                  ? "#4a5568"
+                  ? "#474A4A"
                   : "linear-gradient(135deg, #2A398D 0%, #3CAC3B 100%)",
                 boxShadow: isLoading
                   ? "none"

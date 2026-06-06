@@ -56,12 +56,12 @@ export default function MatchesQueue({
               onClick={() => setActiveMatch(match)}
               className={`relative p-2.5 rounded-lg border text-left transition-all duration-300 cursor-pointer overflow-hidden group ${
                 isSelected
-                  ? "bg-linear-to-b from-[#0e183a] to-[#080d24] border-cyan-500/70 shadow-lg shadow-cyan-500/15"
-                  : "bg-[#060a18] border-slate-900/80 hover:border-slate-800 hover:bg-[#080f2c]"
+                  ? "bg-linear-to-b from-[#474A4A] to-[#474A4A] border-cyan-500/70 shadow-lg shadow-cyan-500/15"
+                  : "bg-[#474A4A] border-slate-900/80 hover:border-slate-800 hover:bg-[#474A4A]"
               }`}
             >
               {isSelected && (
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-[#00f3ff] to-rose-500" />
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-[#2A398D] to-rose-500" />
               )}
 
               {hasPrediction && (

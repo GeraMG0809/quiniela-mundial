@@ -212,7 +212,7 @@ export default function AdminPage() {
         </div>
 
         {globalMessage && (
-          <div className="mb-6 rounded-3xl border border-[#3CAC3B]/30 bg-[#3CAC3B]/10 p-4 text-[#d6ffd6] shadow-lg shadow-[#3CAC3B]/10">
+          <div className="mb-6 rounded-3xl border border-[#3CAC3B]/30 bg-[#3CAC3B]/10 p-4 text-[#D1D4D1] shadow-lg shadow-[#3CAC3B]/10">
             <div className="flex items-center gap-2 font-semibold">
               <CheckCircle className="w-5 h-5 text-[#3CAC3B]" />
               {globalMessage}
@@ -324,14 +324,14 @@ export default function AdminPage() {
                                 onChange={(event) =>
                                   updateField(match.id, teamItem.field, event.target.value)
                                 }
-                                className="w-full rounded-3xl border border-[#2A398D]/40 bg-[#0f1322] px-4 py-4 text-center text-3xl font-bold text-white outline-none transition focus:border-[#3CAC3B] focus:ring-4 focus:ring-[#3CAC3B]/10"
+                                className="w-full rounded-3xl border border-[#2A398D]/40 bg-[#474A4A] px-4 py-4 text-center text-3xl font-bold text-white outline-none transition focus:border-[#3CAC3B] focus:ring-4 focus:ring-[#3CAC3B]/10"
                               />
                             </div>
                           </div>
                         ))}
                       </div>
 
-                      <div className="flex flex-col justify-between gap-6 rounded-3xl border border-zinc-800 bg-[#080a12]/90 p-6">
+                      <div className="flex flex-col justify-between gap-6 rounded-3xl border border-zinc-800 bg-[#474A4A]/90 p-6">
                         <div className="space-y-4">
                           <div className="flex items-center justify-between gap-3 rounded-3xl bg-white/5 p-4 text-sm text-zinc-200">
                             <span className="font-semibold">Estado</span>
@@ -355,7 +355,7 @@ export default function AdminPage() {
 
                         <div className="space-y-3">
                           {update.error && (
-                            <div className="rounded-3xl border border-[#E61D25]/20 bg-[#E61D25]/10 p-3 text-sm text-[#ffe3e3]">
+                            <div className="rounded-3xl border border-[#E61D25]/20 bg-[#E61D25]/10 p-3 text-sm text-[#D1D4D1]">
                               <div className="flex items-center gap-2">
                                 <AlertTriangle className="w-4 h-4" /> {update.error}
                               </div>
@@ -363,7 +363,7 @@ export default function AdminPage() {
                           )}
 
                           {update.success && (
-                            <div className="rounded-3xl border border-[#3CAC3B]/20 bg-[#3CAC3B]/10 p-3 text-sm text-[#d6ffd6]">
+                            <div className="rounded-3xl border border-[#3CAC3B]/20 bg-[#3CAC3B]/10 p-3 text-sm text-[#D1D4D1]">
                               <div className="flex items-center gap-2">
                                 <CheckCircle className="w-4 h-4 text-[#3CAC3B]" /> {update.success}
                               </div>

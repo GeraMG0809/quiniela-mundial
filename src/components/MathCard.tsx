@@ -260,7 +260,7 @@ export default function MatchCard({
           )}
 
           {hasSavedPrediction && (
-            <div className="mt-4 rounded-3xl border border-[#3CAC3B]/20 bg-[#3CAC3B]/10 p-4 text-sm text-[#d6ffd6]">
+            <div className="mt-4 rounded-3xl border border-[#3CAC3B]/20 bg-[#3CAC3B]/10 p-4 text-sm text-[#D1D4D1]">
               Ya tienes un pronóstico guardado para este partido. Edita tu marcador en{' '}
               <Link href="/predictions" className="font-semibold text-white underline">
                 Mis Predicciones

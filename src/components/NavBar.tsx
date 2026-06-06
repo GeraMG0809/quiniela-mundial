@@ -192,7 +192,7 @@ export default function Navbar() {
         </button>
 
         <div
-          className={`absolute right-0 mt-2 w-56 rounded-xl bg-[#1a1f2e] border border-white/10 shadow-xl shadow-black/20 overflow-hidden transition-all duration-300 origin-top-right ${
+          className={`absolute right-0 mt-2 w-56 rounded-xl bg-[#474A4A] border border-white/10 shadow-xl shadow-black/20 overflow-hidden transition-all duration-300 origin-top-right ${
             menuOpen
               ? "opacity-100 scale-100 translate-y-0"
               : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
@@ -254,7 +254,7 @@ export default function Navbar() {
   )
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-gradient-to-r from-[#0f1219] via-[#151a25] to-[#0f1219] border-b border-white/5 backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 w-full bg-gradient-to-r from-[#474A4A] via-[#474A4A] to-[#474A4A] border-b border-white/5 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-18">
           {/* Logo */}
@@ -264,7 +264,7 @@ export default function Navbar() {
           >
             <div className="relative">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2A398D] via-[#3CAC3B] to-[#E61D25] p-0.5 group-hover:shadow-lg group-hover:shadow-[#3CAC3B]/20 transition-all duration-300">
-                <div className="w-full h-full rounded-[10px] bg-[#0f1219] flex items-center justify-center">
+                <div className="w-full h-full rounded-[10px] bg-[#474A4A] flex items-center justify-center">
                   <Trophy className="w-5 h-5 text-[#3CAC3B] group-hover:scale-110 transition-transform duration-300" />
                 </div>
               </div>
@@ -316,7 +316,7 @@ export default function Navbar() {
           mobileMenuOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="px-4 py-4 space-y-4 bg-[#0f1219]/95 border-t border-white/5">
+        <div className="px-4 py-4 space-y-4 bg-[#474A4A]/95 border-t border-white/5">
           <NavLinks mobile />
 
           {loading ? (
