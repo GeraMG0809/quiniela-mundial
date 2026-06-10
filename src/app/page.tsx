@@ -6,6 +6,7 @@ import Navbar from "@/components/NavBar"
 import RankingDashboard from "@/components/RankingDashboard"
 import MatchesQueue from "@/components/MatchesQueue"
 import { getFlagUrl } from "@/lib/flags"
+import Image from "next/image"
 
 type Prediction = {
   id: string
@@ -146,10 +147,14 @@ export default function Home() {
       <div className="p-6">
 
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-3">Quiniela Mundial 2026</h1>
-          <p className="text-sm text-zinc-400 max-w-3xl">
-            Selecciona el próximo partido que quieres predecir y completa tu pronóstico. La tabla de posiciones está justo debajo.
-          </p>
+          <Image
+            src="/images/banner.png"
+            alt="Banner Mundial"
+            width={1920}
+            height={600}
+            priority
+            className="w-full h-auto rounded-3xl border border-zinc-800 shadow-2xl"
+          />
         </div>
 
         <div className="space-y-8">
