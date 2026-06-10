@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import Navbar from "@/components/NavBar"
 import { getFlagUrl } from "@/lib/flags"
-import { Clock, MapPin, Save, AlertTriangle, CheckCircle } from "lucide-react"
+import { Clock, MapPin, Save, AlertTriangle, CheckCircle, Download } from "lucide-react"
 
 type Match = {
   id: string
@@ -50,6 +50,9 @@ export default function AdminPage() {
   const [error, setError] = useState("")
   const [matchUpdates, setMatchUpdates] = useState<Record<string, MatchUpdate>>({})
   const [globalMessage, setGlobalMessage] = useState("")
+  const [syncing, setSyncing] = useState(false)
+  const [syncMessage, setSyncMessage] = useState("")
+  const [syncError, setSyncError] = useState("")
 
   useEffect(() => {
     loadMatches()
@@ -200,15 +203,63 @@ export default function AdminPage() {
     }
   }
 
+  async function handleSync() {
+    setSyncing(true)
+    setSyncMessage("")
+    setSyncError("")
+
+    try {
+      const response = await fetch("/api/matches", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+
+      const responseData = await response.json()
+
+      if (!response.ok) {
+        setSyncError(responseData.error || "Error al sincronizar partidos")
+        window.setTimeout(() => setSyncError(""), 5000)
+        return
+      }
+
+      setSyncMessage(
+        `✓ Sincronización completada: ${responseData.created} partidos agregados, ${responseData.skipped} omitidos`
+      )
+      window.setTimeout(() => setSyncMessage(""), 5000)
+
+      // Recargar los partidos
+      await loadMatches()
+    } catch (err) {
+      console.error(err)
+      setSyncError("Error de conexión al sincronizar partidos")
+      window.setTimeout(() => setSyncError(""), 5000)
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
       <Navbar />
       <div className="p-6 max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold">Panel de Resultados</h1>
-          <p className="mt-2 text-zinc-400 max-w-2xl">
-            Registra los resultados oficiales de los partidos para que el ranking se actualice con los pronósticos reales.
-          </p>
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-4xl font-bold">Panel de Resultados</h1>
+            <p className="mt-2 text-zinc-400 max-w-2xl">
+              Registra los resultados oficiales de los partidos para que el ranking se actualice con los pronósticos reales.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleSync}
+            disabled={syncing}
+            className="inline-flex items-center justify-center gap-2 rounded-3xl bg-linear-to-r from-[#2A398D] to-[#3CAC3B] px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#2A398D]/20 disabled:cursor-not-allowed disabled:opacity-60 whitespace-nowrap"
+          >
+            <Download className="w-4 h-4" />
+            {syncing ? "Sincronizando..." : "Sincronizar partidos"}
+          </button>
         </div>
 
         {globalMessage && (
@@ -216,6 +267,24 @@ export default function AdminPage() {
             <div className="flex items-center gap-2 font-semibold">
               <CheckCircle className="w-5 h-5 text-[#3CAC3B]" />
               {globalMessage}
+            </div>
+          </div>
+        )}
+
+        {syncMessage && (
+          <div className="mb-6 rounded-3xl border border-[#3CAC3B]/30 bg-[#3CAC3B]/10 p-4 text-[#D1D4D1] shadow-lg shadow-[#3CAC3B]/10">
+            <div className="flex items-center gap-2 font-semibold">
+              <CheckCircle className="w-5 h-5 text-[#3CAC3B]" />
+              {syncMessage}
+            </div>
+          </div>
+        )}
+
+        {syncError && (
+          <div className="mb-6 rounded-3xl border border-[#E61D25]/30 bg-[#E61D25]/10 p-4 text-[#D1D4D1] shadow-lg shadow-[#E61D25]/10">
+            <div className="flex items-center gap-2 font-semibold">
+              <AlertTriangle className="w-5 h-5 text-[#E61D25]" />
+              {syncError}
             </div>
           </div>
         )}
