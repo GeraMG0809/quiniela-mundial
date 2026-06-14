@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import Navbar from "@/components/NavBar"
 import { getFlagUrl } from "@/lib/flags"
-import { Clock, MapPin, Save, AlertTriangle, CheckCircle, Download } from "lucide-react"
+import { Clock, MapPin, Save, AlertTriangle, CheckCircle, Download, RefreshCw } from "lucide-react"
 
 type Match = {
   id: string
@@ -44,6 +44,30 @@ function sanitizeScoreValue(value: string) {
   return value
 }
 
+function getDayStart(date: Date) {
+  const day = new Date(date)
+  day.setHours(0, 0, 0, 0)
+  return day
+}
+
+function getTodayMatches(matches: Match[]) {
+  const today = getDayStart(new Date())
+
+  return matches.filter((match) => {
+    const matchDay = getDayStart(new Date(match.matchDate))
+    return matchDay.getTime() === today.getTime()
+  })
+}
+
+function formatDayLabel(date: Date) {
+  return date.toLocaleDateString("es-ES", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  })
+}
+
 export default function AdminPage() {
   const [matches, setMatches] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
@@ -53,6 +77,12 @@ export default function AdminPage() {
   const [syncing, setSyncing] = useState(false)
   const [syncMessage, setSyncMessage] = useState("")
   const [syncError, setSyncError] = useState("")
+  const [updatingTable, setUpdatingTable] = useState(false)
+  const [updateTableMessage, setUpdateTableMessage] = useState("")
+  const [updateTableError, setUpdateTableError] = useState("")
+
+  const todayMatches = useMemo(() => getTodayMatches(matches), [matches])
+  const todayLabel = useMemo(() => formatDayLabel(new Date()), [])
 
   useEffect(() => {
     loadMatches()
@@ -240,6 +270,38 @@ export default function AdminPage() {
     }
   }
 
+  async function handleUpdateTable() {
+    setUpdatingTable(true)
+    setUpdateTableMessage("")
+    setUpdateTableError("")
+
+    try {
+      const response = await fetch("/api/ranking/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+
+      const responseData = await response.json()
+
+      if (!response.ok) {
+        setUpdateTableError(responseData.error || "Error al actualizar la tabla")
+        window.setTimeout(() => setUpdateTableError(""), 5000)
+        return
+      }
+
+      setUpdateTableMessage(responseData.message || "Tabla actualizada correctamente.")
+      window.setTimeout(() => setUpdateTableMessage(""), 5000)
+    } catch (err) {
+      console.error(err)
+      setUpdateTableError("Error de conexión al actualizar la tabla")
+      window.setTimeout(() => setUpdateTableError(""), 5000)
+    } finally {
+      setUpdatingTable(false)
+    }
+  }
+
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
       <Navbar />
@@ -248,18 +310,32 @@ export default function AdminPage() {
           <div>
             <h1 className="text-4xl font-bold">Panel de Resultados</h1>
             <p className="mt-2 text-zinc-400 max-w-2xl">
-              Registra los resultados oficiales de los partidos para que el ranking se actualice con los pronósticos reales.
+              Registra los resultados oficiales de los partidos de hoy y luego pulsa &quot;Actualizar tabla&quot; para sumar los puntos a los participantes.
+            </p>
+            <p className="mt-1 text-sm font-medium text-[#3CAC3B] capitalize">
+              {todayLabel}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={handleSync}
-            disabled={syncing}
-            className="inline-flex items-center justify-center gap-2 rounded-3xl bg-linear-to-r from-[#2A398D] to-[#3CAC3B] px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#2A398D]/20 disabled:cursor-not-allowed disabled:opacity-60 whitespace-nowrap"
-          >
-            <Download className="w-4 h-4" />
-            {syncing ? "Sincronizando..." : "Sincronizar partidos"}
-          </button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              onClick={handleUpdateTable}
+              disabled={updatingTable}
+              className="inline-flex items-center justify-center gap-2 rounded-3xl bg-linear-to-r from-[#3CAC3B] to-[#2A398D] px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#3CAC3B]/20 disabled:cursor-not-allowed disabled:opacity-60 whitespace-nowrap"
+            >
+              <RefreshCw className={`w-4 h-4 ${updatingTable ? "animate-spin" : ""}`} />
+              {updatingTable ? "Actualizando..." : "Actualizar tabla"}
+            </button>
+            <button
+              type="button"
+              onClick={handleSync}
+              disabled={syncing}
+              className="inline-flex items-center justify-center gap-2 rounded-3xl bg-linear-to-r from-[#2A398D] to-[#3CAC3B] px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#2A398D]/20 disabled:cursor-not-allowed disabled:opacity-60 whitespace-nowrap"
+            >
+              <Download className="w-4 h-4" />
+              {syncing ? "Sincronizando..." : "Sincronizar partidos"}
+            </button>
+          </div>
         </div>
 
         {globalMessage && (
@@ -267,6 +343,24 @@ export default function AdminPage() {
             <div className="flex items-center gap-2 font-semibold">
               <CheckCircle className="w-5 h-5 text-[#3CAC3B]" />
               {globalMessage}
+            </div>
+          </div>
+        )}
+
+        {updateTableMessage && (
+          <div className="mb-6 rounded-3xl border border-[#3CAC3B]/30 bg-[#3CAC3B]/10 p-4 text-[#D1D4D1] shadow-lg shadow-[#3CAC3B]/10">
+            <div className="flex items-center gap-2 font-semibold">
+              <CheckCircle className="w-5 h-5 text-[#3CAC3B]" />
+              {updateTableMessage}
+            </div>
+          </div>
+        )}
+
+        {updateTableError && (
+          <div className="mb-6 rounded-3xl border border-[#E61D25]/30 bg-[#E61D25]/10 p-4 text-[#D1D4D1] shadow-lg shadow-[#E61D25]/10">
+            <div className="flex items-center gap-2 font-semibold">
+              <AlertTriangle className="w-5 h-5 text-[#E61D25]" />
+              {updateTableError}
             </div>
           </div>
         )}
@@ -297,13 +391,13 @@ export default function AdminPage() {
           <div className="rounded-3xl border border-zinc-700/70 bg-zinc-900/80 p-8 text-yellow-300 text-center">
             {error}
           </div>
-        ) : matches.length === 0 ? (
+        ) : todayMatches.length === 0 ? (
           <div className="rounded-3xl border border-zinc-700/70 bg-zinc-900/80 p-8 text-zinc-400 text-center">
-            No hay partidos disponibles.
+            No hay partidos programados para hoy.
           </div>
         ) : (
           <div className="space-y-6">
-            {matches.map((match) => {
+            {todayMatches.map((match) => {
               const update = matchUpdates[match.id] || {
                 homeValue: match.homeScore !== null ? String(match.homeScore) : "",
                 awayValue: match.awayScore !== null ? String(match.awayScore) : "",

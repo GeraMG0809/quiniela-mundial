@@ -21,7 +21,7 @@ export async function GET() {
         return {
           id: user.id,
           name: user.name,
-          points: score.points,
+          points: user.points,
           exactCount: score.exactCount,
           correctResultCount: score.correctResultCount,
           predictionsCount: score.predictionsCount

@@ -44,14 +44,16 @@ export async function POST(request: Request) {
       )
     }
 
-    // calcular tiempo de bloqueo: 10 minutos antes del inicio
     const matchTime = new Date(match.matchDate).getTime()
-    const lockTime = matchTime - 10 * 60 * 1000 // 10 minutos en ms
 
-    if (Date.now() >= lockTime) {
+    if (Date.now() >= matchTime) {
       return NextResponse.json(
-        { error: "Predicciones cerradas: faltan menos de 10 minutos" },
-        { status: 400 }
+        {
+          error: "El partido ya comenzó. Las predicciones están cerradas."
+        },
+        {
+          status: 400
+        }
       )
     }
 

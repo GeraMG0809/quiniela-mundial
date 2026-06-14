@@ -2,7 +2,6 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcrypt"
 import { sessionCookieOptions } from "@/lib/auth"
-import { calculateUserScore } from "@/lib/scoring"
 
 export async function POST(request: Request) {
   try {
@@ -16,13 +15,6 @@ export async function POST(request: Request) {
     const user = await prisma.user.findUnique({
       where: {
         email
-      },
-      include: {
-        predictions: {
-          include: {
-            match: true
-          }
-        }
       }
     })
 
@@ -53,8 +45,6 @@ export async function POST(request: Request) {
       )
     }
 
-    const score = calculateUserScore(user.predictions)
-
     const response = NextResponse.json({
       authenticated: true,
       user: {
@@ -62,7 +52,7 @@ export async function POST(request: Request) {
         name: user.name,
         email: user.email,
         role: user.role,
-        points: score.points
+        points: user.points
       }
     })
 
@@ -73,7 +63,7 @@ export async function POST(request: Request) {
         name: user.name,
         email: user.email,
         role: user.role,
-        points: score.points
+        points: user.points
       }),
       sessionCookieOptions
     )
