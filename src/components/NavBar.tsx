@@ -101,6 +101,14 @@ export default function Navbar() {
         <BarChart3 className="w-4 h-4" />
         <span>Ranking</span>
       </Link>
+      <Link
+        href="/predictions/all"
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300 ${mobile ? "w-full" : ""}`}
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        <Target className="w-4 h-4" />
+        <span>Predicciones</span>
+      </Link>
     </div>
   )
 
