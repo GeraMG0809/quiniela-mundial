@@ -12,11 +12,8 @@ export default function AllPredictionsPage() {
               Quiniela Mundial 2026
             </p>
             <h1 className="mt-3 text-4xl font-bold tracking-tight">
-              Predicciones de todos
+              Predicciones
             </h1>
-            <p className="mt-2 max-w-2xl text-zinc-400">
-              Pronosticos guardados por partido y participante.
-            </p>
           </div>
         </div>
 
