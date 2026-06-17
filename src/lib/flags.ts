@@ -33,7 +33,7 @@ const flagCodeMap: Record<string, string> = {
   "algeria":"dz",
   "austia":"at",
   "uzbekistan": "uz",
-  "dr congo": "cd",
+  "congo dr": "cd",
   "iran": "ir",
   "iraq":"iq",
   "new zealand":"nz",
@@ -48,7 +48,8 @@ const flagCodeMap: Record<string, string> = {
   "ecuador": "ec",
   "egypt":"eg",
   "paraguay":"py",
-  "australia":"au"
+  "australia":"au",
+  "austris": "aut"
 }
 
 function normalizeCountryName(name: string) {
