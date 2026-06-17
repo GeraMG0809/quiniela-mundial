@@ -49,7 +49,7 @@ const flagCodeMap: Record<string, string> = {
   "egypt":"eg",
   "paraguay":"py",
   "australia":"au",
-  "austria": "aut"
+  "austria": "at"
 }
 
 function normalizeCountryName(name: string) {
