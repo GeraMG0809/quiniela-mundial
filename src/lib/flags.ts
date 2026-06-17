@@ -6,7 +6,7 @@ const flagCodeMap: Record<string, string> = {
   "japan": "jp",
   "south korea": "kr",
   "mexico": "mx",
-  "usa": "us",
+  "united states": "us",
   "canada": "ca",
   "brazil": "br",
   "colombia": "co",
