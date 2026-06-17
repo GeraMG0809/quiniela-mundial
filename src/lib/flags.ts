@@ -26,7 +26,7 @@ const flagCodeMap: Record<string, string> = {
   "turkey": "tr",
   "scotland": "gb-sct",
   "bosnia-herzegovina" :"ba",
-  "cape verde": "cv",
+  "cape verde islands": "cv",
   "curacao":"cw",
   "tunisia":"tn",
   "ivory coast": "ci",
@@ -49,7 +49,7 @@ const flagCodeMap: Record<string, string> = {
   "egypt":"eg",
   "paraguay":"py",
   "australia":"au",
-  "austris": "aut"
+  "austria": "aut"
 }
 
 function normalizeCountryName(name: string) {
