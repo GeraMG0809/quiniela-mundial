@@ -1,9 +1,24 @@
 import { NextResponse } from "next/server"
+import type { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth"
 import { calculatePredictionScore } from "@/lib/scoring"
 
-export async function GET() {
+type PredictionsView = "pending" | "finished"
+
+function getDateRange(dateValue: string | null) {
+  if (!dateValue || !/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+    return null
+  }
+
+  const start = new Date(`${dateValue}T00:00:00`)
+  const end = new Date(start)
+  end.setDate(end.getDate() + 1)
+
+  return { start, end }
+}
+
+export async function GET(request: Request) {
   try {
     const user = await getSession()
 
@@ -18,10 +33,57 @@ export async function GET() {
       )
     }
 
-    const matches = await prisma.match.findMany({
-      orderBy: {
-        matchDate: "asc",
+    const { searchParams } = new URL(request.url)
+    const view = searchParams.get("view") === "finished" ? "finished" : "pending"
+    const dateRange = getDateRange(searchParams.get("date"))
+    const hasDateFilter = dateRange !== null
+
+    const baseFilters: Prisma.MatchWhereInput[] = [
+      {
+        predictions: {
+          some: {},
+        },
       },
+    ]
+
+    if (dateRange) {
+      baseFilters.push({
+        matchDate: {
+          gte: dateRange.start,
+          lt: dateRange.end,
+        },
+      })
+    }
+
+    const statusFilter: Prisma.MatchWhereInput =
+      view === "finished"
+        ? {
+            OR: [
+              { status: "FINISHED" },
+              {
+                AND: [
+                  { homeScore: { not: null } },
+                  { awayScore: { not: null } },
+                ],
+              },
+            ],
+          }
+        : {
+            AND: [
+              { status: "UPCOMING" },
+              { homeScore: null },
+              { awayScore: null },
+            ],
+          }
+
+    const matches = await prisma.match.findMany({
+      where: {
+        AND: [...baseFilters, statusFilter],
+      },
+      orderBy: {
+        matchDate: view === "finished" && !hasDateFilter ? "desc" : "asc",
+      },
+      take: hasDateFilter ? 40 : view === "finished" ? 10 : 12,
       include: {
         predictions: {
           include: {
@@ -74,7 +136,11 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json(payload)
+    return NextResponse.json({
+      view: view satisfies PredictionsView,
+      date: searchParams.get("date"),
+      matches: payload,
+    })
   } catch (error) {
     console.error(error)
 
