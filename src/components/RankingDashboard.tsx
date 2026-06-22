@@ -263,7 +263,7 @@ export default function RankingDashboard() {
                       </span>
                     </td>
                     <td className="px-4 py-4 text-center">
-                      <span className="inline-flex items-center justify-center min-w-8 px-2 py-1 bg-[#2A398D]/30 text-[#2A398D] rounded-lg font-semibold text-sm">
+                      <span className="inline-flex items-center justify-center min-w-8 px-2 py-1 border-yellow-500/40 bg-yellow-500/10 text-yellow-300 rounded-lg font-semibold text-sm">
                         {user.exacts}
                       </span>
                     </td>
